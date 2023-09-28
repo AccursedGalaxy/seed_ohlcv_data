@@ -56,3 +56,7 @@ async def main():
     repo.git.add(A=True)
     repo.git.commit('-m', 'Updated data')
     repo.git.push()
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
