@@ -11,7 +11,7 @@ from git import Repo
 logging.basicConfig(level=logging.INFO)
 
 # Initialize the exchange object in async mode
-exchange = getattr(ccxt, 'binance')({
+exchange = getattr(ccxt, 'bybit')({
     'enableRateLimit': True,
 })
 
@@ -29,7 +29,11 @@ async def fetch_and_save_data(symbol):
         ohlcv = await exchange.fetch_ohlcv(symbol, '1d')
         df = pd.DataFrame(
             ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        # Convert timestamp to YYYYMMDDT format
+        df['timestamp'] = pd.to_datetime(
+            df['timestamp'], unit='ms').dt.strftime('%Y%m%dT%H%M%S')
+        # Sort by timestamp in ascending order
+        df = df.sort_values(by='timestamp', ascending=True)
 
         # Save to CSV
         csv_filename = f"{repo_dir}/data/{symbol.replace('/', '')}.csv"
@@ -64,6 +68,9 @@ async def main():
         repo.git.push()
     else:
         logging.info("No changes to commit")
+
+    # Close the exchange connection
+    await exchange.close()
 
 
 if __name__ == '__main__':
