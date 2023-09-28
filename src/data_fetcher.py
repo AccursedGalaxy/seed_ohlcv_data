@@ -1,6 +1,6 @@
 import logging
 import asyncio
-import ccxt
+import ccxt.async_support as ccxt
 import pandas as pd
 import sys
 import os
@@ -10,8 +10,10 @@ from git import Repo
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-# Initialize the exchange object
-exchange = ccxt.binance()
+# Initialize the exchange object in async mode
+exchange = getattr(ccxt, 'binance')({
+    'enableRateLimit': True,
+})
 
 # List of symbols
 symbols = ['BTC/USDT', 'ETH/USDT']  # Add all 50 symbols here
