@@ -66,7 +66,8 @@ async def main():
 
     # Create JSON file
     json_data = {
-        "symbol": symbols,
+        # Replace the / in the symbol so make BTC/USDT to BTCUSDT
+        "symbols": [symbol.replace('/', '') for symbol in symbols],
         "pricescale": [10] * len(symbols),  # Adjust as needed
         "description": [f"Description for {symbol}" for symbol in symbols]
     }
