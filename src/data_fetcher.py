@@ -15,8 +15,6 @@ exchange = getattr(ccxt, 'bybit')({
     'enableRateLimit': True,
 })
 
-# List of symbols
-symbols = ['BTC/USDT', 'ETH/USDT']  # Add all 50 symbols here
 
 # Initialize the repo object
 repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +42,22 @@ async def fetch_and_save_data(symbol):
         logging.error(f"Error fetching data for {symbol}: {e}")
 
 
+async def get_symbols():
+    # Fetch all symbols from the exchange
+    await exchange.load_markets()
+    all_symbols = exchange.symbols
+
+    # Filter symbols traded against USDT and without special characters
+    usdt_symbols = [symbol for symbol in all_symbols if symbol.endswith(
+        '/USDT') and '/' in symbol and '.' not in symbol]
+
+    # Select the first 50 symbols
+    selected_symbols = usdt_symbols[:50]
+    return selected_symbols
+
+
 async def main():
+    symbols = await get_symbols()
     # Create a list of coroutine objects
     coroutines = [fetch_and_save_data(symbol) for symbol in symbols]
 
