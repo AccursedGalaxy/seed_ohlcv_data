@@ -48,7 +48,7 @@ async def main():
         "pricescale": [10] * len(symbols),  # Adjust as needed
         "description": [f"Description for {symbol}" for symbol in symbols]
     }
-    json_filename = f"{repo_dir}/symbol_info/seed_yourusername_yourdata.json"
+    json_filename = f"{repo_dir}/symbol_info/seed_ohlcv_data.json"
     with open(json_filename, 'w') as f:
         json.dump(json_data, f)
 
@@ -56,7 +56,3 @@ async def main():
     repo.git.add(A=True)
     repo.git.commit('-m', 'Updated data')
     repo.git.push()
-
-# Run the script
-if __name__ == "__main__":
-    asyncio.run(main())
