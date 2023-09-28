@@ -54,8 +54,11 @@ async def main():
 
     # Commit and push to GitHub
     repo.git.add(A=True)
-    repo.git.commit('-m', 'Updated data')
-    repo.git.push()
+    if repo.is_dirty():
+        repo.git.commit('-m', 'Updated data')
+        repo.git.push()
+    else:
+        logging.info("No changes to commit")
 
 
 if __name__ == '__main__':
