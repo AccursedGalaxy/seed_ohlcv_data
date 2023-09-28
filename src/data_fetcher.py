@@ -39,8 +39,11 @@ async def fetch_and_save_data(symbol):
 
 
 async def main():
+    # Create a list of coroutine objects
+    coroutines = [fetch_and_save_data(symbol) for symbol in symbols]
+
     # Fetch and save data for all symbols
-    await asyncio.gather(*(fetch_and_save_data(symbol) for symbol in symbols))
+    await asyncio.gather(*coroutines)
 
     # Create JSON file
     json_data = {
