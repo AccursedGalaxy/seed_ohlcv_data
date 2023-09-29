@@ -2,6 +2,7 @@ import logging
 import asyncio
 import ccxt.async_support as ccxt
 import pandas as pd
+import numpy as np
 import sys
 import os
 import json
@@ -27,15 +28,32 @@ async def fetch_and_save_data(symbol):
         ohlcv = await exchange.fetch_ohlcv(symbol, '1d')
         df = pd.DataFrame(
             ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
         # Convert timestamp to YYYYMMDDT format
         df['timestamp'] = pd.to_datetime(
-            df['timestamp'], unit='ms').dt.strftime('%Y%m%dT%H%M%S')
+            df['timestamp'], unit='ms').dt.strftime('%Y%m%dT')
+
+        # Define the number of decimal places you want to keep
+        decimal_places = 9  # Adjust as needed
+
+        # Format float columns to decimal notation with a fixed number of decimal places
+        float_columns = ['open', 'high', 'low', 'close', 'volume']
+        for column in float_columns:
+            df[column] = df[column].apply(
+                lambda x: format(x, f'.{decimal_places}f'))
+
+        # Handle invalid float values
+        # Replace +INF and -INF with NAN
+        df.replace(['inf', '-inf'], np.nan, inplace=True)
+        # Drop rows with NAN values in specified columns
+        df.dropna(subset=float_columns, inplace=True)
+
         # Sort by timestamp in ascending order
         df = df.sort_values(by='timestamp', ascending=True)
 
-        # Save to CSV
+        # Save to CSV without headers
         csv_filename = f"{repo_dir}/data/{symbol.replace('/', '')}.csv"
-        df.to_csv(csv_filename, index=False)
+        df.to_csv(csv_filename, index=False, header=False)
 
         logging.info(f"Data for {symbol} saved to {csv_filename}")
     except Exception as e:
@@ -52,7 +70,7 @@ async def get_symbols():
         '/USDT') and '/' in symbol and '.' not in symbol]
 
     # Select the first 50 symbols
-    selected_symbols = usdt_symbols[:50]
+    selected_symbols = usdt_symbols[:1]
     return selected_symbols
 
 
@@ -67,11 +85,11 @@ async def main():
     # Create JSON file
     json_data = {
         # Replace the / in the symbol so make BTC/USDT to BTCUSDT
-        "symbols": [symbol.replace('/', '') for symbol in symbols],
+        "symbol": [symbol.replace('/', '') for symbol in symbols],
         "pricescale": [10] * len(symbols),  # Adjust as needed
         "description": [f"Description for {symbol}" for symbol in symbols]
     }
-    json_filename = f"{repo_dir}/symbol_info/seed_ohlcv_data.json"
+    json_filename = f"{repo_dir}/symbol_info/seed_accursedgalaxy_sectors.json"
     with open(json_filename, 'w') as f:
         json.dump(json_data, f)
 
