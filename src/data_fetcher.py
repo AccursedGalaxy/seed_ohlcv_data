@@ -70,7 +70,7 @@ async def get_symbols():
         '/USDT') and '/' in symbol and '.' not in symbol]
 
     # Select the first 50 symbols
-    selected_symbols = usdt_symbols[:1]
+    selected_symbols = usdt_symbols[:50]
     return selected_symbols
 
 
